@@ -81,6 +81,10 @@ GET /index.php?id=&subid=qI0uKk7U
 | Malware Family | Koi Stealer |
 | Suspicious URL | http://79.124.78.197/index.php?id=&subid=qI0uKk7U |
 
+Suspicious URL:
+http://79.124.78.197/index.php?id=&subid=qI0uKk7U
+Note: At the time of writing this report the server is no longer responding.
+
 ## 7. Analyst Conclusion
 
 The investigation confirmed malicious command-and-control communication associated with the **Koi Stealer** malware family.
