@@ -1,100 +1,97 @@
-# Suricata IDS + PCAP Triage Lab
+# Suricata IDS + PCAP Malware Investigation
 
-## Overview
+## 1. Incident Summary
 
-This lab demonstrates how Suricata IDS can detect suspicious network activity and how packet captures (PCAP) can be analyzed during incident investigation.
+During analysis of a network traffic capture using Suricata IDS, a high-priority alert was triggered indicating possible malware command-and-control communication.
 
-The goal of this project is to simulate the workflow of a SOC analyst investigating network alerts.
+The alert identified activity associated with the **Koi Stealer** malware family.
 
----
+Further investigation of the PCAP file in Wireshark confirmed outbound HTTP communication from the internal host **172.17.0.99** to the external IP address **79.124.78.197**.
 
-## Lab Environment
+The traffic included an HTTP GET request to the endpoint:
 
-- Ubuntu Server
-- Suricata IDS
-- Wireshark
-- PCAP traffic analysis
+/index.php?id=&subid=qI0uKk7U
 
-Suricata was configured to monitor network traffic and generate alerts based on suspicious activity detected in the PCAP file.
+This behavior is consistent with malware beaconing to a command-and-control server.
 
----
+## 2. Environment
 
-## Scenario
+The investigation was performed using the following tools:
 
-A packet capture containing suspicious network activity was analyzed.
+- **Suricata IDS** for network threat detection
+- **Wireshark** for packet-level traffic analysis
+- **PCAP traffic sample** from malware-traffic-analysis.net
 
-Suricata processed the PCAP file and generated alerts indicating potentially malicious behavior.
+The analysis environment included:
 
-The traffic was then inspected using Wireshark to understand the nature of the communication.
+- Ubuntu Server (Suricata IDS)
+- Ubuntu Desktop (Wireshark analysis)
 
----
-
-## Suricata Alert
-
-Suricata detected suspicious traffic patterns in the PCAP file.
+## 3. Detection (Suricata)
 
 ![Suricata Alert](screenshots/suricata_alert.png)
 
-The alert indicates that the IDS detected activity matching known detection rules.
+*Suricata alert identifying suspected Koi Stealer command-and-control communication.*
 
----
+Suricata detected malware command-and-control activity associated with the **Koi Stealer** malware family.
 
-## Packet Analysis (Wireshark)
+**Triggered rule:**
 
-The PCAP file was opened in Wireshark to investigate the network communication.
+ET MALWARE Win32/Koi Stealer CnC Checkin (GET)
 
-![Wireshark Analysis](screenshots/wireshark_analysis.png)
+Additional related alert:
 
-Key observations:
+ET ATTACK_RESPONSE Koi Loader/Stealer CnC Config Inbound
 
-- Suspicious HTTP requests
-- External IP communication
-- Unusual traffic patterns
+![Suricata EVE JSON Alert](screenshots/eve_json_alert.png)
 
----
+*Example of Suricata EVE JSON alert event showing telemetry generated during analysis.*
 
-## Suricata Logs (EVE JSON)
+## 4. Network Traffic Analysis (Wireshark)
 
-Suricata generated logs in EVE JSON format containing detailed event information.
+![Wireshark HTTP Request](screenshots/wireshark_analysis.png)
 
-![Suricata Logs](screenshots/eve_json_log.png)
+*Wireshark inspection showing HTTP GET request from the infected host to the suspected C2 server.*
 
-These logs provide valuable telemetry for SOC analysts.
+Further inspection of the PCAP file in Wireshark confirmed outbound HTTP communication between the internal host and the suspected command-and-control server.
 
----
+The infected host **172.17.0.99** initiated an HTTP GET request to the external server **79.124.78.197**.
 
-## Detection Value
+Request observed:
 
-This lab demonstrates how Suricata can be used for:
+```
+GET /index.php?id=&subid=qI0uKk7U
+```
+## 5. Threat Timeline
 
-- Network intrusion detection
-- Traffic inspection
-- Alert generation
-- Incident investigation
+| Time | Event |
+|-----|------|
+| PCAP analysis | Suspicious traffic identified in network capture |
+| Suricata detection | Alert triggered for ET MALWARE Win32/Koi Stealer CnC Checkin |
+| Traffic analysis | HTTP request identified to external host 79.124.78.197 |
+| IOC extraction | Malicious URL and IP extracted from network traffic |
 
----
+## 6. Indicators of Compromise
 
-## Skills Demonstrated
+| Indicator Type | Value |
+|----------------|------|
+| Infected Host | 172.17.0.99 |
+| C2 Server | 79.124.78.197 |
+| Protocol | HTTP (TCP/80)
+| Malware Family | Koi Stealer |
+| Suspicious URL | http://79.124.78.197/index.php?id=&subid=qI0uKk7U |
 
-- Network traffic analysis
-- Suricata IDS configuration
-- PCAP investigation
-- SOC alert triage
+## 7. Analyst Conclusion
 
----
+The investigation confirmed malicious command-and-control communication associated with the **Koi Stealer** malware family.
 
-## MITRE ATT&CK Mapping
+Suricata detected the initial alert indicating suspicious HTTP activity.  
+Further packet analysis in Wireshark confirmed outbound communication from the internal host **172.17.0.99** to the external server **79.124.78.197**.
 
-Possible related techniques:
+The traffic pattern and request structure are consistent with known Koi Stealer beaconing behavior used for command-and-control communication.
 
-- T1046 – Network Service Discovery
-- T1071 – Application Layer Protocol
-- T1049 – System Network Connections Discovery
+This investigation demonstrates a typical SOC workflow:
 
----
+Detection → Traffic Analysis → IOC Extraction → Incident Conclusion.
 
-## Conclusion
 
-This project demonstrates how network telemetry can be analyzed using Suricata IDS and Wireshark during a security investigation.
-
-It reflects a typical SOC workflow involving detection, investigation, and traffic analysis.
